@@ -1,17 +1,17 @@
-# Fresh-Fetch
+# Fresh-ts
 
 A TypeScript client for the FreshRSS API.
 
 ## Installation
 
 ```bash
-npm install fresh-fetch
+npm install fresh-ts
 ```
 
 ## Usage
 
 ```typescript
-import { FreshFetchClient } from 'fresh-fetch';
+import { FreshFetchClient } from 'fresh-ts';
 
 const client = new FreshFetchClient({
   host: 'https://your-freshrss-instance.com',

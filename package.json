@@ -2,7 +2,7 @@
   "author": "Niklas Wockenfuß",
   "homepage": "https://niklaswockenfuss.de/",
   "license": "MIT",
-  "name": "fresh-fetch",
+  "name": "fresh-ts",
   "version": "1.0.0",
   "description": "A TypeScript client for the FreshRSS API",
   "keywords": [
@@ -28,10 +28,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/NiklasDerEchte/fresh-fetch.git"
+    "url": "git+https://github.com/NiklasDerEchte/fresh-ts.git"
   },
   "bugs": {
-    "url": "https://github.com/NiklasDerEchte/fresh-fetch/issues"
+    "url": "https://github.com/NiklasDerEchte/fresh-ts/issues"
   },
   "dependencies": {
     "ts-node": "^10.9.2",
