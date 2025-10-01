@@ -50,4 +50,4 @@ console.log(items);
 
 ## License
 
-MIT © Niklas Wockenfuß
+MIT © [Niklas Wockenfuß](https://niklaswockenfuss.de/)
