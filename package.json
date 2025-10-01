@@ -3,7 +3,7 @@
   "homepage": "https://niklaswockenfuss.de/",
   "license": "MIT",
   "name": "fresh-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A TypeScript client for the FreshRSS API",
   "keywords": [
     "FreshRSS",
