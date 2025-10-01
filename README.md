@@ -20,7 +20,7 @@ const client = new FreshFetchClient({
 });
 
 // Get items from the last 7 days
-async function main(): Promise<void> {;
+async function main(): Promise<void> {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(endDate.getDate() - 7);
