@@ -1,14 +1,37 @@
 {
   "author": "Niklas Wockenfuß",
+  "homepage": "https://niklaswockenfuss.de/",
   "license": "MIT",
-  "keywords": ["FreshRSS", "API", "TypeScript", "Client", "Fetch"],
   "name": "fresh-fetch",
   "version": "1.0.0",
   "description": "A TypeScript client for the FreshRSS API",
+  "keywords": [
+    "FreshRSS",
+    "API",
+    "TypeScript",
+    "Client",
+    "Fetch",
+    "RSS",
+    "Node"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "ts-node-dev --respawn test.ts",
     "start": "ts-node test.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NiklasDerEchte/fresh-fetch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/NiklasDerEchte/fresh-fetch/issues"
   },
   "dependencies": {
     "ts-node": "^10.9.2",
@@ -16,5 +39,8 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

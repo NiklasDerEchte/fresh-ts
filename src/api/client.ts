@@ -1,7 +1,7 @@
 import { APICore } from './core';
-import { APIError, APIResponse, DateInput, FreshRSSOptions, Item, MarkAction } from './types';
+import { APIError, APIResponse, DateInput, FreshRSSOptions, Item, MarkAction } from '../types';
 
-export class FreshFetch {
+export class FreshFetchClient {
   private core: APICore;
   constructor(options: FreshRSSOptions) {
     this.core = new APICore(options);

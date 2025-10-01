@@ -1,4 +1,4 @@
-import { APIError, APIResponse, AuthenticationError, FreshRSSOptions, PlainObject } from './types';
+import { APIError, APIResponse, AuthenticationError, FreshRSSOptions, PlainObject } from '../types';
 import crypto from 'crypto';
 
 export class APICore {
