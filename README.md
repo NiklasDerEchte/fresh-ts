@@ -20,12 +20,14 @@ const client = new FreshFetchClient({
 });
 
 // Get items from the last 7 days
-const endDate = new Date();
-const startDate = new Date();
-startDate.setDate(endDate.getDate() - 7);
+async function main(): Promise<void> {;
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7);
+    console.log(await client.getItemsFromDates(startDate, endDate));
+}
 
-const items = await client.getItemsFromDates(startDate, endDate);
-console.log(items);
+main().catch(console.error);
 ```
 
 ## API
@@ -35,8 +37,7 @@ console.log(items);
 - `host`: Your FreshRSS instance URL
 - `username`: Your FreshRSS username  
 - `password`: Your FreshRSS password
-- `verifySsl`: Verify SSL certificates (default: true)
-- `verbose`: Enable verbose logging (default: false)
+- `debug`: Enable debug logging (default: false)
 
 ### Methods
 

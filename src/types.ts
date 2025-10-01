@@ -6,7 +6,6 @@ export interface FreshRSSOptions {
   host?: string;
   username?: string;
   password?: string;
-  verifySsl?: boolean;
   debug?: boolean;
 }
 
