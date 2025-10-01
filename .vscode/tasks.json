@@ -2,9 +2,19 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Fresh-RSS",
+      "label": "Watch Fresh-RSS",
       "type": "shell",
       "command": "npm install && npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Fresh-RSS",
+      "type": "shell",
+      "command": "npm install && npm run start",
       "options": {
         "cwd": "${workspaceFolder}"
       },

@@ -1,15 +1,17 @@
 {
   "author": "Niklas Wockenfuß",
   "license": "MIT",
-  "keywords": [],
-  "name": "minimal-typescript-project",
+  "keywords": ["FreshRSS", "API", "TypeScript", "Client", "Fetch"],
+  "name": "fresh-fetch",
   "version": "1.0.0",
-  "description": "A minimal TypeScript project setup.",
+  "description": "A TypeScript client for the FreshRSS API",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node-dev --respawn src/index.ts"
+    "dev": "ts-node-dev --respawn test.ts",
+    "start": "ts-node test.ts"
   },
   "dependencies": {
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0"
   },
   "devDependencies": {

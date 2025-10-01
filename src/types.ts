@@ -1,0 +1,42 @@
+export type PlainObject = Record<string, any>;
+export type MarkAction = 'read' | 'saved' | 'unsaved' | 'unread';
+export type DateInput = string | number | Date | null;
+
+export interface FreshRSSOptions {
+  host?: string;
+  username?: string;
+  password?: string;
+  verifySsl?: boolean;
+  debug?: boolean;
+}
+
+export interface APIResponse {
+  auth?: boolean;
+  [key: string]: any;
+}
+
+export interface Item {
+  id: number;
+  feed_id: string | number;
+  title?: string;
+  author?: string;
+  html?: string;
+  url?: string;
+  is_saved?: boolean;
+  is_read?: boolean;
+  created_on_time: string | number;
+}
+
+export class APIError extends Error {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'APIError';
+  }
+}
+
+export class AuthenticationError extends APIError {
+  constructor(message?: string) {
+    super(message);
+    this.name = 'AuthenticationError';
+  }
+}
