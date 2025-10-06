@@ -1,14 +1,53 @@
-import { APICore, APIError, APIResponse, DateInput, FreshRSSOptions, Item, MarkAction } from '../types';
-import { GreaderAPICore } from './greader-core';
-import { FeverAPICore } from './fever-core';
+import { APIError, AuthenticationError, DateInput, FreshRSSOptions, HttpMethod, Item, MarkAction } from '../types';
+import crypto from 'crypto';
+import { request } from './http';
 
-export class FreshFetchClient {
-  private core: APICore;
-  constructor(options: FreshRSSOptions) {
-    if(!options.api || options.api == 'fever') {
-      this.core = new FeverAPICore(options);
-    } else {
-      this.core = new GreaderAPICore(options);;
+export class FeverClient {
+
+  constructor(
+    private apiEndpoint: string,
+    private apiKey: string,
+    private debug = false
+  ) { }
+
+
+  static async create(options: FreshRSSOptions): Promise<FeverClient> {
+    let host = options.host || process.env.FRESHRSS_API_HOST;
+    let username = options.username || process.env.FRESHRSS_API_USERNAME;
+    let password = options.password || process.env.FRESHRSS_API_PASSWORD;
+    let debug = options.debug ?? false;
+    if (!host) {
+      throw new Error('Host URL is required. Provide it as an argument or set FRESHRSS_API_HOST environment variable.');
+    }
+    if (!username) {
+      throw new Error('Username is required. Provide it as an argument or set FRESHRSS_API_USERNAME environment variable.');
+    }
+    if (!password) {
+      throw new Error('Password is required. Provide it as an argument or set FRESHRSS_API_PASSWORD environment variable.');
+    }
+    if (!host.endsWith("/")) {
+      host += "/";
+    }
+    let apiEndpoint = `${host}api/fever.php`;
+    if (debug) console.log(`Using FreshRSS API endpoint: ${apiEndpoint}`);
+    let apiKey = crypto.createHash('md5').update(`${username}:${password}`).digest('hex');
+    const client = new FeverClient(apiEndpoint, apiKey, debug);
+    await client.authenticate();
+    return client;
+  }
+
+  /**
+   * Initialize authentication check asynchronously
+   */
+  private async authenticate(): Promise<void> {
+    const response = await request<{api_version: number, auth: boolean, last_refreshed_on_time: number}>({
+      url: this.apiEndpoint,
+      method: HttpMethod.POST,
+      body: { api_key: this.apiKey }
+    });
+    if(this.debug) console.log('Authentication response:', response);
+    if (!response?.auth) {
+      throw new AuthenticationError('Failed to authenticate with FreshRSS API');
     }
   }
 
@@ -37,12 +76,17 @@ export class FreshFetchClient {
   /**
    * Marks an item with the specified action (read, saved, etc.)
    */
-  public async setMark(action: MarkAction, id: string | number): Promise<APIResponse> {
+  public async setMark(action: MarkAction, id: string | number): Promise<any> {
     if (action === 'unread') {
       throw new Error("The Fever API does not support marking as 'unread'");
     }
 
-    const response = await this.core.request('api', { mark: 'item', as_: action, id });
+    const response = await request<any>({
+      url: this.apiEndpoint,
+      method: HttpMethod.POST,
+      body: { api_key: this.apiKey },
+      urlSearchParams: { api: '', mark: 'item', as: action, id }
+    });
 
     if (action === 'read') {
       if (!('read_item_ids' in response)) {
@@ -60,22 +104,37 @@ export class FreshFetchClient {
   /**
    * Retrieves all feeds from FreshRSS
    */
-  public async getFeeds(): Promise<APIResponse> {
-    return this.core.request('feeds');
+  public async getFeeds(): Promise<any> {
+    return await request({
+      url: this.apiEndpoint,
+      method: HttpMethod.POST,
+      body: { api_key: this.apiKey },
+      urlSearchParams: { api: '', feeds: '' }
+    });
   }
 
   /**
    * Retrieves all groups from FreshRSS
    */
-  public async getGroups(): Promise<APIResponse> {
-    return this.core.request('groups');
+  public async getGroups(): Promise<any> {
+    return await request({
+      url: this.apiEndpoint,
+      method: HttpMethod.POST,
+      body: { api_key: this.apiKey },
+      urlSearchParams: { api: '', groups: '' }
+    });
   }
 
   /**
    * Retrieves all unread items
    */
   public async getUnreads(): Promise<Item[]> {
-    const response = await this.core.request('unread_item_ids');
+    const response = await request<any>({
+      url: this.apiEndpoint,
+      method: HttpMethod.POST,
+      body: { api_key: this.apiKey },
+      urlSearchParams: { api: '', unread_item_ids: ''}
+    });
     const idsString = String(response?.unread_item_ids ?? '');
     const unreadIds = idsString.split(',').map((s) => s.trim()).filter(Boolean);
 
@@ -89,7 +148,13 @@ export class FreshFetchClient {
    * Retrieves all saved items
    */
   public async getSaved(): Promise<Item[]> {
-    const response = await this.core.request('saved_item_ids');
+    const response = await request<any>({
+      url: this.apiEndpoint,
+      method: HttpMethod.POST,
+      body: { api_key: this.apiKey },
+      urlSearchParams: { api: '', saved_item_ids: '' }
+    });
+    if(this.debug) console.log('Saved items response:', response);
     const idsString = String(response?.saved_item_ids ?? '');
     const savedIds = idsString.split(',').map((s) => s.trim()).filter(Boolean);
 
@@ -112,7 +177,12 @@ export class FreshFetchClient {
     for (let i = 0; i < totalRequested; i += 50) {
       const batch = ids.slice(i, i + 50);
       const batchParams = { with_ids: batch.join(',') };
-      const response = await this.core.request('items', batchParams);
+      const response = await request<any>({
+        url: this.apiEndpoint,
+        method: HttpMethod.POST,
+        body: { api_key: this.apiKey },
+        urlSearchParams: {api: '', items: '', with_ids: batch.join(',')}
+      });
       const items = (response?.items ?? []) as Item[];
       allItems.push(...items);
     }
@@ -169,7 +239,13 @@ export class FreshFetchClient {
     let currentSinceId = sinceId;
 
     while (true) {
-      const response = await this.core.request('items', { since_id: String(currentSinceId) });
+      const response = await request<any>({
+        url: this.apiEndpoint,
+        method: HttpMethod.POST,
+        body: { api_key: this.apiKey }, 
+        urlSearchParams: { api: '', items: { since_id: String(currentSinceId) }}
+      });
+      if(this.debug) console.log('Items response:', response);
       const itemsBatch = (response?.items ?? []) as Item[];
 
       if (!itemsBatch || itemsBatch.length === 0) break;

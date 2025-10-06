@@ -9,19 +9,11 @@ export enum HttpMethod {
   PUT = "put",
 }
 
-export enum ResponseType {
-  JSON = "json",
-  BLOB = "blob"
-}
-
-export interface RequestConfig { // ToDo Implement in APICore:request as input propertie - update fever-core
-  endpoint: string;
-  body?: any;
+export interface RequestConfig {
+  url: string;
   method?: HttpMethod;
-  skipAuth?: boolean;
-  responseType?: ResponseType;
-  headerResponse?: boolean;
   urlSearchParams?: {};
+  body?: any;
 }
 
 export interface FreshRSSOptions {
@@ -29,12 +21,6 @@ export interface FreshRSSOptions {
   username?: string;
   password?: string;
   debug?: boolean;
-  api?: 'fever' | 'greader'; // default is fever
-}
-
-export interface APIResponse {
-  auth?: boolean;
-  [key: string]: any;
 }
 
 export interface Item {
@@ -61,11 +47,4 @@ export class AuthenticationError extends APIError {
     super(message);
     this.name = 'AuthenticationError';
   }
-}
-
-export interface APICore {
-  /**
-   * Makes an API call to the FreshRSS server
-   */
-  request(endpoint: string, params?: PlainObject): Promise<APIResponse>;
 }

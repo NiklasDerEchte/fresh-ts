@@ -1,2 +1,2 @@
-export { FreshFetchClient } from './api/client';
+export { FeverClient } from './api/fever-client';
 export * from './types';
