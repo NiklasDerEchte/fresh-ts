@@ -2,12 +2,34 @@ export type PlainObject = Record<string, any>;
 export type MarkAction = 'read' | 'saved' | 'unsaved' | 'unread';
 export type DateInput = string | number | Date | null;
 
+export enum HttpMethod {
+  POST = "post",
+  GET = "get",
+  DELETE = "delete",
+  PUT = "put",
+}
+
+export enum ResponseType {
+  JSON = "json",
+  BLOB = "blob"
+}
+
+export interface RequestConfig { // ToDo Implement in APICore:request as input propertie - update fever-core
+  endpoint: string;
+  body?: any;
+  method?: HttpMethod;
+  skipAuth?: boolean;
+  responseType?: ResponseType;
+  headerResponse?: boolean;
+  urlSearchParams?: {};
+}
+
 export interface FreshRSSOptions {
   host: string;
   username?: string;
   password?: string;
   debug?: boolean;
-  endpoint?: 'fever' | 'greader'; // default is fever
+  api?: 'fever' | 'greader'; // default is fever
 }
 
 export interface APIResponse {
@@ -42,8 +64,8 @@ export class AuthenticationError extends APIError {
 }
 
 export interface APICore {
-/**
- * Makes an API call to the FreshRSS server
- */
+  /**
+   * Makes an API call to the FreshRSS server
+   */
   request(endpoint: string, params?: PlainObject): Promise<APIResponse>;
 }

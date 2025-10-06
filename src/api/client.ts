@@ -5,7 +5,7 @@ import { FeverAPICore } from './fever-core';
 export class FreshFetchClient {
   private core: APICore;
   constructor(options: FreshRSSOptions) {
-    if(!options.endpoint || options.endpoint == 'fever') {
+    if(!options.api || options.api == 'fever') {
       this.core = new FeverAPICore(options);
     } else {
       this.core = new GreaderAPICore(options);;
