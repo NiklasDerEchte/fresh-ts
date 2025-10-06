@@ -3,10 +3,11 @@ export type MarkAction = 'read' | 'saved' | 'unsaved' | 'unread';
 export type DateInput = string | number | Date | null;
 
 export interface FreshRSSOptions {
-  host?: string;
+  host: string;
   username?: string;
   password?: string;
   debug?: boolean;
+  endpoint?: 'fever' | 'greader'; // default is fever
 }
 
 export interface APIResponse {

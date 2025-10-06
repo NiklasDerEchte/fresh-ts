@@ -1,13 +1,17 @@
 # Source files
 src/
+test/
+tests/
 test.ts
 tsconfig.json
 
 # Development files
 .vscode/
 .git/
+.github/
 .gitignore
 *.log
+docs/
 npm-debug.log*
 
 # Tests
