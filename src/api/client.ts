@@ -1,9 +1,9 @@
-import { APIError, APIResponse, DateInput, FreshRSSOptions, Item, MarkAction } from '../types';
+import { APICore, APIError, APIResponse, DateInput, FreshRSSOptions, Item, MarkAction } from '../types';
 import { GreaderAPICore } from './greader-core';
 import { FeverAPICore } from './fever-core';
 
 export class FreshFetchClient {
-  private core: FeverAPICore | GreaderAPICore;
+  private core: APICore;
   constructor(options: FreshRSSOptions) {
     if(!options.endpoint || options.endpoint == 'fever') {
       this.core = new FeverAPICore(options);

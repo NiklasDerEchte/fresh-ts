@@ -1,7 +1,7 @@
-import { APIError, APIResponse, AuthenticationError, FreshRSSOptions, PlainObject } from '../types';
+import { APICore, APIError, APIResponse, AuthenticationError, FreshRSSOptions, PlainObject } from '../types';
 import crypto from 'crypto';
 
-export class FeverAPICore {
+export class FeverAPICore implements APICore {
   private readonly apiEndpoint: string;
   private readonly debug: boolean;
   private readonly apiKey: string;

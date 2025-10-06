@@ -40,3 +40,10 @@ export class AuthenticationError extends APIError {
     this.name = 'AuthenticationError';
   }
 }
+
+export interface APICore {
+/**
+ * Makes an API call to the FreshRSS server
+ */
+  request(endpoint: string, params?: PlainObject): Promise<APIResponse>;
+}

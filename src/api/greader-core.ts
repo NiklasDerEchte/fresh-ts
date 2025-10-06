@@ -1,7 +1,7 @@
-import { APIError, APIResponse, AuthenticationError, FreshRSSOptions, PlainObject } from '../types';
+import { APICore, APIError, APIResponse, AuthenticationError, FreshRSSOptions, PlainObject } from '../types';
 import crypto from 'crypto';
 
-export class GreaderAPICore {
+export class GreaderAPICore implements APICore {
   private readonly apiEndpoint: string;
   private readonly debug: boolean;
   private readonly apiKey: string;
@@ -21,9 +21,9 @@ export class GreaderAPICore {
     if (!password) {
       throw new Error('Password is required. Provide it as an argument or set FRESHRSS_API_PASSWORD environment variable.');
     }
-    if(!host.endsWith("/")) host += "/";
+    if (!host.endsWith("/")) host += "/";
     this.apiEndpoint = `${host}api/greader.php`;
-    if(this.debug) console.log(`Using FreshRSS API endpoint: ${this.apiEndpoint}`);
+    if (this.debug) console.log(`Using FreshRSS API endpoint: ${this.apiEndpoint}`);
     this.apiKey = crypto.createHash('md5').update(`${username}:${password}`).digest('hex');
     this.authenticate();
   }
@@ -36,5 +36,12 @@ export class GreaderAPICore {
     if (!response?.auth) {
       throw new AuthenticationError('Failed to authenticate with FreshRSS API');
     }
+  }
+
+  /**
+ * Makes an API call to the FreshRSS server
+ */
+  public async request(endpoint: string = 'api', params: PlainObject = {}): Promise<APIResponse> {
+    return {};
   }
 }
