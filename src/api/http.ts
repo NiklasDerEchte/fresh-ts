@@ -5,7 +5,7 @@ import { RequestConfig } from "../types";
  */
 export async function request<T = any>(config: RequestConfig): Promise<T> {
   const url = new URL(config.url);
-  
+
   if (config.urlSearchParams) {
     Object.keys(config.urlSearchParams).forEach((key) => {
       url.searchParams.set(key, String((config.urlSearchParams as any)[key]));
@@ -33,15 +33,22 @@ export async function request<T = any>(config: RequestConfig): Promise<T> {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
   });
-
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const isText = contentType.includes('text/plain');
   if (!response.ok) {
     const text = await response.text().catch(() => '');
     throw new Error(`HTTP ${response.status} ${response.statusText}: ${text}`);
   }
-  
-  const result = await response.json().catch((error: any) => {
-    throw new Error(`Failed to parse JSON response: ${error.message}`);
-  });
-
+  let result;
+  if (isJson) {
+    result = await response.json().catch(async (error: any) => {
+      throw new Error(`Failed to parse JSON response: ${error.message}`);
+    });
+  } else if (isText) {
+    result = await response.text().catch(async (error: any) => {
+      throw new Error(`Failed to get text response: ${error.message}`);
+    });
+  }
   return result as T;
 }

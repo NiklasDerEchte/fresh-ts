@@ -4,13 +4,23 @@ import { request } from './http';
 
 export class FeverClient {
 
+  /**
+   * Creates an instance of FeverClient.
+   * @param apiEndpoint 
+   * @param apiKey 
+   * @param debug 
+   */
   constructor(
     private apiEndpoint: string,
     private apiKey: string,
     private debug = false
   ) { }
 
-
+  /**
+   * Factory method to create and authenticate a FeverClient instance
+   * @param options FreshRSSOptions
+   * @returns Promise<FeverClient>
+   */
   static async create(options: FreshRSSOptions): Promise<FeverClient> {
     let host = options.host || process.env.FRESHRSS_API_HOST;
     let username = options.username || process.env.FRESHRSS_API_USERNAME;
@@ -36,8 +46,11 @@ export class FeverClient {
     return client;
   }
 
+
   /**
    * Initialize authentication check asynchronously
+   * @throws AuthenticationError if authentication fails
+   * @returns Promise<void>
    */
   private async authenticate(): Promise<void> {
     const response = await request<{api_version: number, auth: boolean, last_refreshed_on_time: number}>({
@@ -52,29 +65,30 @@ export class FeverClient {
   }
 
   /**
-   * Converts date string to microsecond timestamp ID
+   * Converts date string to microsecond timestamp
+   * @param dateString The date string to convert (ISO format or YYYY-MM-DD)
+   * @returns number The corresponding microsecond timestamp
    */
-  private dateToId(dateString: string, dateFormat: string = '%Y-%m-%d'): number {
-    if (dateFormat === '%Y-%m-%d') {
-      const parts = dateString.split('-').map((part) => Number(part));
-      if (parts.length < 3 || parts.some(Number.isNaN)) {
-        throw new Error('Invalid date string for format %Y-%m-%d');
+  private dateToMicroseconds(dateString: string): number {
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      const [year, month, day] = dateString.split('-').map(Number);
+      if (isNaN(year) || isNaN(month) || isNaN(day)) {
+        throw new Error(`Invalid date string: ${dateString}`);
       }
-      const [year, month, day] = parts;
-      // Date.UTC returns milliseconds; multiply by 1000 to get microseconds
       return Date.UTC(year, month - 1, day) * 1000;
     }
-
-    // Fallback: try Date.parse
     const parsed = Date.parse(dateString);
     if (isNaN(parsed)) {
-      throw new Error('Unable to parse date string');
+      throw new Error(`Invalid date string: ${dateString}`);
     }
     return parsed * 1000;
   }
 
   /**
    * Marks an item with the specified action (read, saved, etc.)
+   * @param action The action to perform ('read', 'saved', 'unsaved')
+   * @param id The ID of the item to mark
+   * @returns Promise<any> The API response
    */
   public async setMark(action: MarkAction, id: string | number): Promise<any> {
     if (action === 'unread') {
@@ -103,6 +117,7 @@ export class FeverClient {
 
   /**
    * Retrieves all feeds from FreshRSS
+   * @returns Promise<any> The API response
    */
   public async getFeeds(): Promise<any> {
     return await request({
@@ -115,6 +130,7 @@ export class FeverClient {
 
   /**
    * Retrieves all groups from FreshRSS
+   * @returns Promise<any> The API response
    */
   public async getGroups(): Promise<any> {
     return await request({
@@ -127,6 +143,7 @@ export class FeverClient {
 
   /**
    * Retrieves all unread items
+   * @return Promise<Item[]> The list of unread items
    */
   public async getUnreads(): Promise<Item[]> {
     const response = await request<any>({
@@ -146,6 +163,7 @@ export class FeverClient {
 
   /**
    * Retrieves all saved items
+   * @return Promise<Item[]> The list of saved items
    */
   public async getSaved(): Promise<Item[]> {
     const response = await request<any>({
@@ -166,6 +184,8 @@ export class FeverClient {
 
   /**
    * Retrieves items by their IDs
+   * @param ids The list of item IDs to retrieve
+   * @returns Promise<Item[]> The list of retrieved items
    */
   public async getItemsFromIds(ids: number[]): Promise<Item[]> {
     if (!ids || ids.length === 0) return [];
@@ -176,7 +196,6 @@ export class FeverClient {
     // Process in batches of 50 items
     for (let i = 0; i < totalRequested; i += 50) {
       const batch = ids.slice(i, i + 50);
-      const batchParams = { with_ids: batch.join(',') };
       const response = await request<any>({
         url: this.apiEndpoint,
         method: HttpMethod.POST,
@@ -200,11 +219,13 @@ export class FeverClient {
 
   /**
    * Retrieves items within a date range
+   * @param since The start date (inclusive)
+   * @param until The end date (exclusive). If null, defaults to now.
+   * @returns Promise<Item[]> The list of items within the date range
    */
   public async getItemsFromDates(
     since: DateInput,
-    until: DateInput = null,
-    dateFormat: string = '%Y-%m-%d'
+    until: DateInput = null
   ): Promise<Item[]> {
     if (since === null) {
       throw new Error("The 'since' parameter is required");
@@ -212,7 +233,7 @@ export class FeverClient {
 
     let sinceId: number;
     if (typeof since === 'string') {
-      sinceId = this.dateToId(since, dateFormat);
+      sinceId = this.dateToMicroseconds(since);
     } else if (since instanceof Date) {
       sinceId = since.getTime() * 1000;
     } else {
@@ -223,7 +244,7 @@ export class FeverClient {
     if (until === null) {
       untilId = Date.now() * 1000; // Now in microseconds
     } else if (typeof until === 'string') {
-      untilId = this.dateToId(until, dateFormat);
+      untilId = this.dateToMicroseconds(until);
     } else if (until instanceof Date) {
       untilId = until.getTime() * 1000;
     } else {
