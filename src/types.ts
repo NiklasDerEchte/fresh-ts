@@ -14,6 +14,7 @@ export interface RequestConfig {
   method?: HttpMethod;
   urlSearchParams?: {};
   body?: any;
+  headers?: Record<string, string>;
 }
 
 export interface FreshRSSOptions {

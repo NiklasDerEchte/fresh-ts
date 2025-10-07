@@ -1,5 +1,5 @@
 import { AuthenticationError, FreshRSSOptions, HttpMethod } from "../types";
-import { request } from './http';
+import { HttpService } from './http';
 
 // curl 'https://freshrss.example.net/api/greader.php/accounts/ClientLogin?Email=alice&Passwd=Abcdef123456'
 // SID=alice/8e6845e089457af25303abc6f53356eb60bdb5f8
@@ -9,6 +9,10 @@ import { request } from './http';
 //   'https://freshrss.example.net/api/greader.php/reader/api/0/tag/list?output=json'
 
 export class GreaderClient {
+
+  private httpService: HttpService;
+  private sessionToken: string | undefined;
+
   /**
    * Creates an instance of GreaderClient.
    * @param apiEndpoint 
@@ -21,7 +25,9 @@ export class GreaderClient {
     private username: string,
     private password: string,
     private debug = false
-  ) { }
+  ) {
+    this.httpService = new HttpService(debug);
+   }
 
   /**
    * Factory method to create and authenticate a GreaderClient instance
@@ -58,8 +64,8 @@ export class GreaderClient {
    * @returns Promise<void>
    */
   private async authenticate(): Promise<void> {
-    const response = await request<string>({
-      url: this.apiEndpoint.endsWith("/") ? `${this.apiEndpoint}accounts/ClientLogin` : `${this.apiEndpoint}/accounts/ClientLogin`,
+    const response = await this.httpService.request<string>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/accounts/ClientLogin'),
       method: HttpMethod.POST,
       urlSearchParams: { Email: this.username, Passwd: this.password }
     });
@@ -72,9 +78,28 @@ export class GreaderClient {
     if (!auth) {
       throw new AuthenticationError('Failed to authenticate with FreshRSS API');
     }
-    // TODO:  get token /reader/api/0/token
+    let token = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/token'),
+      method: HttpMethod.GET,
+      headers: {
+        Authorization: `GoogleLogin auth=${auth}`
+      }
+    });
+    if(!token) {
+      throw new AuthenticationError('Failed to retrieve session token from FreshRSS API');
+    }
+    this.sessionToken = token;
   }
 
+  /**
+   * Parse authentication response string into key-value pairs
+   * Example:
+   *   SID=12345
+   *   LSID=67890
+   *   Auth=abcdef
+   * @param responseText 
+   * @returns Record<string, string>
+   */
   private parseAuthResponse(responseText: string): Record<string, string> {
     const result: Record<string, string> = {};
     const regex = /^(\w+)=(.*)$/gm;

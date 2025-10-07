@@ -1,8 +1,10 @@
 import { APIError, AuthenticationError, DateInput, FreshRSSOptions, HttpMethod, Item, MarkAction } from '../types';
 import crypto from 'crypto';
-import { request } from './http';
+import { HttpService } from './http';
 
 export class FeverClient {
+
+  private httpService: HttpService;
 
   /**
    * Creates an instance of FeverClient.
@@ -14,7 +16,9 @@ export class FeverClient {
     private apiEndpoint: string,
     private apiKey: string,
     private debug = false
-  ) { }
+  ) {
+    this.httpService = new HttpService(debug);
+   }
 
   /**
    * Factory method to create and authenticate a FeverClient instance
@@ -53,7 +57,7 @@ export class FeverClient {
    * @returns Promise<void>
    */
   private async authenticate(): Promise<void> {
-    const response = await request<{api_version: number, auth: boolean, last_refreshed_on_time: number}>({
+    const response = await this.httpService.request<{api_version: number, auth: boolean, last_refreshed_on_time: number}>({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey }
@@ -95,7 +99,7 @@ export class FeverClient {
       throw new Error("The Fever API does not support marking as 'unread'");
     }
 
-    const response = await request<any>({
+    const response = await this.httpService.request<any>({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey },
@@ -120,7 +124,7 @@ export class FeverClient {
    * @returns Promise<any> The API response
    */
   public async getFeeds(): Promise<any> {
-    return await request({
+    return await this.httpService.request({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey },
@@ -133,7 +137,7 @@ export class FeverClient {
    * @returns Promise<any> The API response
    */
   public async getGroups(): Promise<any> {
-    return await request({
+    return await this.httpService.request({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey },
@@ -146,7 +150,7 @@ export class FeverClient {
    * @return Promise<Item[]> The list of unread items
    */
   public async getUnreads(): Promise<Item[]> {
-    const response = await request<any>({
+    const response = await this.httpService.request<any>({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey },
@@ -166,7 +170,7 @@ export class FeverClient {
    * @return Promise<Item[]> The list of saved items
    */
   public async getSaved(): Promise<Item[]> {
-    const response = await request<any>({
+    const response = await this.httpService.request<any>({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey },
@@ -196,7 +200,7 @@ export class FeverClient {
     // Process in batches of 50 items
     for (let i = 0; i < totalRequested; i += 50) {
       const batch = ids.slice(i, i + 50);
-      const response = await request<any>({
+      const response = await this.httpService.request<any>({
         url: this.apiEndpoint,
         method: HttpMethod.POST,
         body: { api_key: this.apiKey },
@@ -260,7 +264,7 @@ export class FeverClient {
     let currentSinceId = sinceId;
 
     while (true) {
-      const response = await request<any>({
+      const response = await this.httpService.request<any>({
         url: this.apiEndpoint,
         method: HttpMethod.POST,
         body: { api_key: this.apiKey }, 
