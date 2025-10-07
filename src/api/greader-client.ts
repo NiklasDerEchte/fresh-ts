@@ -11,7 +11,10 @@ import { HttpService } from './http';
 export class GreaderClient {
 
   private httpService: HttpService;
+  private client = "fresh-ts:GreaderClient";
   private sessionToken: string | undefined;
+  private userAuth: string | undefined;
+  private sid: string | undefined;
 
   /**
    * Creates an instance of GreaderClient.
@@ -27,7 +30,7 @@ export class GreaderClient {
     private debug = false
   ) {
     this.httpService = new HttpService(debug);
-   }
+  }
 
   /**
    * Factory method to create and authenticate a GreaderClient instance
@@ -59,6 +62,14 @@ export class GreaderClient {
   }
 
   /**
+   * Change the client name used in API requests
+   * @param name 
+   */
+  public changeClientName(name: string) {
+    this.client = name;
+  }
+
+  /**
    * Initialize authentication check asynchronously
    * @throws AuthenticationError if authentication fails
    * @returns Promise<void>
@@ -78,14 +89,19 @@ export class GreaderClient {
     if (!auth) {
       throw new AuthenticationError('Failed to authenticate with FreshRSS API');
     }
+    if (!sid) {
+      throw new AuthenticationError('Failed to authenticate with FreshRSS API: Missing SID');
+    }
+    this.userAuth = auth;
+    this.sid = sid;
     let token = await this.httpService.request<any>({
       url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/token'),
       method: HttpMethod.GET,
       headers: {
-        Authorization: `GoogleLogin auth=${auth}`
+        Authorization: `GoogleLogin auth=${this.userAuth}`
       }
     });
-    if(!token) {
+    if (!token) {
       throw new AuthenticationError('Failed to retrieve session token from FreshRSS API');
     }
     this.sessionToken = token;
@@ -112,4 +128,106 @@ export class GreaderClient {
     return result;
   }
 
+  public async getSubscriptions() { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/subscription/list'),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getUnreadCount() { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/unread-count'),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getEntries(
+    n: number = 20, // Maximum number of requests, up to 1000
+    r: 'o' | 'n' = 'o', // Sort by. o means sort by posting time (old->new), n means sort by updating time (new->old).
+    t: number | undefined = undefined, // Get articles that are more recent than the specified timestamp (Unix timestamp, milliseconds)
+    ot: number | undefined = undefined, // Get articles older than the specified timestamp (Unix timestamp, milliseconds)
+    xt: string | undefined = undefined, // Exclude tab, example for excluding read content
+    c: string | undefined = undefined // Continued reading string for paging to load more entries
+  ) { // TODO: Docu and define return type, change parameter names and timestamps to Date()
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/stream/contents/user/-/state/com.google/reading-list'),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        n: n,
+        r: r,
+        t: t,
+        ot: ot,
+        xt: xt,
+        c: c,
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getUserInfos() { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/user-info'),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getFriends() { // TODO: Docu and define return type | BUG 400 Bad Request i dont know why
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/friend/list'),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
 }
