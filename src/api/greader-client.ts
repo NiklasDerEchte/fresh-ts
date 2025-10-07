@@ -1,13 +1,6 @@
 import { AuthenticationError, FreshRSSOptions, HttpMethod } from "../types";
 import { HttpService } from './http';
 
-// curl 'https://freshrss.example.net/api/greader.php/accounts/ClientLogin?Email=alice&Passwd=Abcdef123456'
-// SID=alice/8e6845e089457af25303abc6f53356eb60bdb5f8
-// Auth=alice/8e6845e089457af25303abc6f53356eb60bdb5f8
-
-// curl -s -H "Authorization:GoogleLogin auth=alice/8e6845e089457af25303abc6f53356eb60bdb5f8" \
-//   'https://freshrss.example.net/api/greader.php/reader/api/0/tag/list?output=json'
-
 export class GreaderClient {
 
   private httpService: HttpService;
@@ -164,7 +157,7 @@ export class GreaderClient {
     return response;
   }
 
-  public async getEntries(
+  public async getItems(
     n: number = 20, // Maximum number of requests, up to 1000
     r: 'o' | 'n' = 'o', // Sort by. o means sort by posting time (old->new), n means sort by updating time (new->old).
     t: number | undefined = undefined, // Get articles that are more recent than the specified timestamp (Unix timestamp, milliseconds)
@@ -217,6 +210,137 @@ export class GreaderClient {
     let response = await this.httpService.request<any>({
       url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/friend/list'),
       method: HttpMethod.GET,
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getPreferences() { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/preference/list'),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getStarredItems( // TODO: Docu and define return type
+    n: number = 20 // Get the number of starred articles, the maximum is 1000.
+  ) {
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/stream/contents/user/-/state/com.google/starred'),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        n: n,
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getFeedItems( // TODO: Docu and define return type
+    feedUrl: string,
+    n: number = 20, // Number of loaded article entries
+    xt: string | undefined = undefined // Excluded labels
+  ) {
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/atom/feed/${feedUrl}`),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        n: n,
+        xt: xt,
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getUserSharedItems( // TODO: Docu and define return type
+    count: number = 20 // To get the number of articles shared by users
+  ) {
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/reader/atom/user/-/state/com.google/broadcast`),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        n: count,
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async getTags() { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/tag/list`),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async addSubscription(
+    ac: string, // operation type, fixed value is subscribe.
+    s: string, // {feed_url}: the link to the RSS feed to be added, prefixed with feed/
+    a: string, // {folder}: the RSS group you want to add to, prefixed with user/-/label/
+    t: string // {feed_title}:The name of the subscription source you want to chang
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/subscription/edit`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        s: s,
+        a: a,
+        t: t
+      },
       urlSearchParams: {
         T: this.sessionToken,
         client: this.client,
