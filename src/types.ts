@@ -53,9 +53,12 @@ export namespace Fever {
 }
 
 export namespace Greader {
-  export type GreaderAPIResponse = {
-    max: number;
-  }
+  export type GreaderAPIResponse<K extends string, T> = 
+  { 
+    max: number 
+  } & { 
+    [P in K]: T 
+  };
   
   export interface UnreadCount {
     count: number;

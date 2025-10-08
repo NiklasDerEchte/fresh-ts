@@ -139,8 +139,8 @@ export class GreaderClient {
     return response;
   }
 
-  public async getUnreadCount() { // TODO: Docu and define return type
-    let response = await this.httpService.request<any>({
+  public async getUnreadCount() { // TODO: Docu
+    let response = await this.httpService.request<Greader.GreaderAPIResponse<'unreadcounts', Greader.UnreadCount[]>>({
       url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/unread-count'),
       method: HttpMethod.GET,
       urlSearchParams: {
@@ -340,6 +340,577 @@ export class GreaderClient {
         s: s,
         a: a,
         t: t
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async quickAddSubscription(
+    quickadd: string // the link to the RSS feed to be added
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/subscription/quickadd`),
+      method: HttpMethod.POST,
+      body: {
+        quickadd: `feed/${quickadd}`
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async editTag(
+    ac: string, // operation type, fixed value is edit
+    a: string, // the name of the folder, prefixed with user/-/label/
+    s: string // the link to the RSS feed to be added to the folder, prefixed with feed/, where a feed link must be provided
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        a: a,
+        s: s
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async editSpecificSharedTag(
+    a: string, // operation type, fixed value is user/-/state/com.google/broadcast
+    i: string, // The entry_id of the corresponding article, which can be found in the <id> element of the <atom> tag
+    s: string // The stream_id of the corresponding article can be found in the gr:stream-id attribute of the <source> element of the <atom> tag
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        a: a,
+        i: i,
+        s: s,
+        async: true
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async editSpecificTag(
+    a: string, // {tag} is the name of the label, prefixed with user/-/label/.
+    i: string, // The entry_id of the corresponding article, which can be found in the <id> element of the <atom> tag
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        a: a,
+        i: i,
+        async: true
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async addMultipleTags(
+    a: string, // {tag1} {tag2} ... For tag names, use user/-/label/ prefix, add multiple tags by repeating the a parameter
+    i: string, // The entry_id of the corresponding article, which can be found in the <id> element of the <atom> tag
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        a: a,
+        i: i,
+        async: true
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async moveSubscription(
+    ac: string, // Operation type
+    s: string, // {feed_url}:  Links to RSS feeds to be moved
+    r: string, // {old_folder}: The name of the folder where the subscription feed is currently located, using the user/-/label/ prefix
+    a: string // {new_folder}: Subscription source target folder name, using the user/-/label/ prefix
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/subscription/edit`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        s: s,
+        r: r,
+        a: a
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async renameSubscription(
+    ac: string, // Operation type
+    s: string, // {feed_url}: Links to RSS feeds to be renamed
+    t: string, // {new_feed_title}: New subscription feed name
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/subscription/edit`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        s: s,
+        t: t
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async editSubscriptionTag(
+    ac: string, // Operation type
+    a: string, // user label/folder path, {folder} for label/folder name, use user/-/label/ prefix
+    s: string, // {feed_url}: the link to the RSS feed to be added to the tag, prefixed with feed/.A feed must be provided or the folder cannot be created
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        a: a,
+        s: s
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async deleteTag(
+    ac: string, // Operation type
+    s: string, // user label/folder path, {folder} is the folder name, use user/-/label/ prefix
+    t: string, // Name of the folder to be deleted
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/disable-tag`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        s: s,
+        t: t
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async removeTagFromItems(
+    s: string, //  	{tag_name}: The name of the label to be deleted must be prefixed with user/-/label/.
+    t: string, // {tag_name}: the name of the tag to be deleted
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/disable-tag`),
+      method: HttpMethod.POST,
+      body: {
+        s: s,
+        t: t
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async cancellationSpecifiedTag(
+    r: string, // Cancelling a shared operation
+    i: string, // The {entry_id} corresponding to the article can be found in the <entry> tag
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        r: r,
+        i: i,
+        async: true
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async editTagSettings(
+    s: string, // {tag}: Corresponding tags
+    t: string, // {tag}: Corresponding tags
+    pub: boolean // Publicly released or not, true for public, false for private 
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        s: s,
+        t: t,
+        pub: pub
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async deleteSubscription(
+    ac: string, // Action type, in this case unsubscribe
+    s: string, // {feed_id}:The id of the RSS feed you want to delete must start with feed/, example: feed/52
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/subscription/edit`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        s: s,
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async deleteMultipleSubscriptions(
+    ac: string, // Action type, in this case unsubscribe
+    s: string, // {feed_id}:The id of the RSS feed you want to delete must start with feed/, example: feed/52
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/subscription/edit`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        s: s,
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async markFeedAsRead(
+    s: string, // feed URL
+    ts: string, // feed URL
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/mark-all-as-read`),
+      method: HttpMethod.POST,
+      body: {
+        s: `feed/${s}`,
+        ts: ts,
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async markFeedInFolderAsRead(
+    s: string, // folder name
+    ts: string, // timestamp to mark read time
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/mark-all-as-read`),
+      method: HttpMethod.POST,
+      body: {
+        s: s,
+        ts: ts,
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async markItemAsRead(
+    ac: string, // Operation type
+    i: string, // entry ID
+    a: string, // mark as read status
+    s: string, // Links to RSS feeds (optional, Google Reader includes this parameter, but it doesn't seem to be necessary)
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        i: i,
+        s: s,
+        a: a,
+        async: true
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async markItemAsUnread(
+    ac: string, // type
+    i: string, // entry ID
+    r: string, // remove read status
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        i: i,
+        r: r,
+        async: true
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async markMultipleItemsAsRead(
+    ac: string, // Operation type
+    i: string, // Multiple Entry IDs, concatenate them with &i=.
+    a: string, // mark as read status
+    s: string, // Links to RSS feeds (optional, Google Reader includes this parameter, but it doesn't seem to be necessary)
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/edit-tag`),
+      method: HttpMethod.POST,
+      body: {
+        ac: ac,
+        i: i,
+        s: s,
+        a: a,
+        async: true
+      },
+      urlSearchParams: {
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async searchCategories(
+    q: string, // Search keyword
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/directory/search`),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        q: q,
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async searchItemIds(
+    q: string, // Search keyword
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/search/items/ids`),
+      method: HttpMethod.GET,
+      urlSearchParams: {
+        q: q,
+        T: this.sessionToken,
+        client: this.client,
+        output: "json"
+      },
+      headers: {
+        Authorization: `GoogleLogin auth=${this.userAuth}`,
+        Cookie: `SID=${this.sid}`
+      }
+    });
+    if (this.debug) console.log(response);
+    return response;
+  }
+
+  public async searchItemContents(
+    i: string, // Multiple item IDs, use &i= to concatenate
+  ) { // TODO: Docu and define return type
+    let response = await this.httpService.request<any>({
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/stream/items/contents`),
+      method: HttpMethod.POST,
+      body: {
+        i: i,
       },
       urlSearchParams: {
         T: this.sessionToken,
