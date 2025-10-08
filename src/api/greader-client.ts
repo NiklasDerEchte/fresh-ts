@@ -224,6 +224,7 @@ export class GreaderClient {
     return response;
   }
 
+  // Maybe this route doesnt exist
   public async getPreferences() { // TODO: Docu and define return type
     let response = await this.httpService.request<any>({
       url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/preference/list'),
@@ -287,6 +288,7 @@ export class GreaderClient {
     return response;
   }
 
+  // Maybe this route doesnt exist
   public async getUserSharedItems( // TODO: Docu and define return type
     count: number = 20 // To get the number of articles shared by users
   ) {
