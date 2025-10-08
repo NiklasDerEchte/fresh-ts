@@ -1,4 +1,4 @@
-import { AuthenticationError, FreshRSSOptions, HttpMethod } from "../types";
+import { Greader, AuthenticationError, FreshRSSOptions, HttpMethod } from "../types";
 import { HttpService } from './http';
 
 export class GreaderClient {

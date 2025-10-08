@@ -1,4 +1,4 @@
-import { APIError, AuthenticationError, DateInput, FreshRSSOptions, HttpMethod, Item, MarkAction } from '../types';
+import { Fever, APIError, AuthenticationError, DateInput, FreshRSSOptions, HttpMethod, MarkAction } from '../types';
 import crypto from 'crypto';
 import { HttpService } from './http';
 
@@ -18,7 +18,7 @@ export class FeverClient {
     private debug = false
   ) {
     this.httpService = new HttpService(debug);
-   }
+  }
 
   /**
    * Factory method to create and authenticate a FeverClient instance
@@ -50,19 +50,18 @@ export class FeverClient {
     return client;
   }
 
-
   /**
    * Initialize authentication check asynchronously
    * @throws AuthenticationError if authentication fails
    * @returns Promise<void>
    */
   private async authenticate(): Promise<void> {
-    const response = await this.httpService.request<{api_version: number, auth: boolean, last_refreshed_on_time: number}>({
+    const response = await this.httpService.request<{ api_version: number, auth: boolean, last_refreshed_on_time: number }>({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey }
     });
-    if(this.debug) console.log('Authentication response:', response);
+    if (this.debug) console.log('Authentication response:', response);
     if (!response?.auth) {
       throw new AuthenticationError('Failed to authenticate with FreshRSS API');
     }
@@ -147,14 +146,14 @@ export class FeverClient {
 
   /**
    * Retrieves all unread items
-   * @return Promise<Item[]> The list of unread items
+   * @return Promise<Fever.Item[]> The list of unread items
    */
-  public async getUnreads(): Promise<Item[]> {
+  public async getUnreads(): Promise<Fever.Item[]> {
     const response = await this.httpService.request<any>({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey },
-      urlSearchParams: { api: '', unread_item_ids: ''}
+      urlSearchParams: { api: '', unread_item_ids: '' }
     });
     const idsString = String(response?.unread_item_ids ?? '');
     const unreadIds = idsString.split(',').map((s) => s.trim()).filter(Boolean);
@@ -167,16 +166,16 @@ export class FeverClient {
 
   /**
    * Retrieves all saved items
-   * @return Promise<Item[]> The list of saved items
+   * @return Promise<Fever.Item[]> The list of saved items
    */
-  public async getSaved(): Promise<Item[]> {
+  public async getSaved(): Promise<Fever.Item[]> {
     const response = await this.httpService.request<any>({
       url: this.apiEndpoint,
       method: HttpMethod.POST,
       body: { api_key: this.apiKey },
       urlSearchParams: { api: '', saved_item_ids: '' }
     });
-    if(this.debug) console.log('Saved items response:', response);
+    if (this.debug) console.log('Saved items response:', response);
     const idsString = String(response?.saved_item_ids ?? '');
     const savedIds = idsString.split(',').map((s) => s.trim()).filter(Boolean);
 
@@ -189,12 +188,12 @@ export class FeverClient {
   /**
    * Retrieves items by their IDs
    * @param ids The list of item IDs to retrieve
-   * @returns Promise<Item[]> The list of retrieved items
+   * @returns Promise<Fever.Item[]> The list of retrieved items
    */
-  public async getItemsFromIds(ids: number[]): Promise<Item[]> {
+  public async getItemsFromIds(ids: number[]): Promise<Fever.Item[]> {
     if (!ids || ids.length === 0) return [];
 
-    const allItems: Item[] = [];
+    const allItems: Fever.Item[] = [];
     const totalRequested = ids.length;
 
     // Process in batches of 50 items
@@ -204,9 +203,9 @@ export class FeverClient {
         url: this.apiEndpoint,
         method: HttpMethod.POST,
         body: { api_key: this.apiKey },
-        urlSearchParams: {api: '', items: '', with_ids: batch.join(',')}
+        urlSearchParams: { api: '', items: '', with_ids: batch.join(',') }
       });
-      const items = (response?.items ?? []) as Item[];
+      const items = (response?.items ?? []) as Fever.Item[];
       allItems.push(...items);
     }
 
@@ -225,12 +224,12 @@ export class FeverClient {
    * Retrieves items within a date range
    * @param since The start date (inclusive)
    * @param until The end date (exclusive). If null, defaults to now.
-   * @returns Promise<Item[]> The list of items within the date range
+   * @returns Promise<Fever.Item[]> The list of items within the date range
    */
   public async getItemsFromDates(
     since: DateInput,
     until: DateInput = null
-  ): Promise<Item[]> {
+  ): Promise<Fever.Item[]> {
     if (since === null) {
       throw new Error("The 'since' parameter is required");
     }
@@ -259,7 +258,7 @@ export class FeverClient {
       throw new Error("The 'since' date must be earlier than the 'until' date");
     }
 
-    const allItems: Item[] = [];
+    const allItems: Fever.Item[] = [];
     const seenIds = new Set<number>();
     let currentSinceId = sinceId;
 
@@ -267,15 +266,15 @@ export class FeverClient {
       const response = await this.httpService.request<any>({
         url: this.apiEndpoint,
         method: HttpMethod.POST,
-        body: { api_key: this.apiKey }, 
-        urlSearchParams: { api: '', items: { since_id: String(currentSinceId) }}
+        body: { api_key: this.apiKey },
+        urlSearchParams: { api: '', items: { since_id: String(currentSinceId) } }
       });
-      if(this.debug) console.log('Items response:', response);
-      const itemsBatch = (response?.items ?? []) as Item[];
+      if (this.debug) console.log('Items response:', response);
+      const itemsBatch = (response?.items ?? []) as Fever.Item[];
 
       if (!itemsBatch || itemsBatch.length === 0) break;
 
-      const newItems: Item[] = [];
+      const newItems: Fever.Item[] = [];
       let highestId = currentSinceId;
 
       for (const item of itemsBatch) {
@@ -306,7 +305,7 @@ export class FeverClient {
       }
     }
 
-    allItems.sort((a: Item, b: Item) => a.id - b.id);
+    allItems.sort((a: Fever.Item, b: Fever.Item) => a.id - b.id);
     return allItems;
   }
 }
