@@ -121,6 +121,7 @@ export class GreaderClient {
     return result;
   }
 
+  // Feeds
   public async getSubscriptions() { // TODO: Docu and define return type
     let response = await this.httpService.request<any>({
       url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/subscription/list'),
@@ -206,43 +207,6 @@ export class GreaderClient {
     return response;
   }
 
-  public async getFriends() { // TODO: Docu and define return type | BUG 400 Bad Request i dont know why
-    let response = await this.httpService.request<any>({
-      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/friend/list'),
-      method: HttpMethod.GET,
-      urlSearchParams: {
-        T: this.sessionToken,
-        client: this.client,
-        output: "json"
-      },
-      headers: {
-        Authorization: `GoogleLogin auth=${this.userAuth}`,
-        Cookie: `SID=${this.sid}`
-      }
-    });
-    if (this.debug) console.log(response);
-    return response;
-  }
-
-  // Maybe this route doesnt exist
-  public async getPreferences() { // TODO: Docu and define return type
-    let response = await this.httpService.request<any>({
-      url: this.httpService.urlForge(this.apiEndpoint, '/reader/api/0/preference/list'),
-      method: HttpMethod.GET,
-      urlSearchParams: {
-        T: this.sessionToken,
-        client: this.client,
-        output: "json"
-      },
-      headers: {
-        Authorization: `GoogleLogin auth=${this.userAuth}`,
-        Cookie: `SID=${this.sid}`
-      }
-    });
-    if (this.debug) console.log(response);
-    return response;
-  }
-
   public async getStarredItems( // TODO: Docu and define return type
     n: number = 20 // Get the number of starred articles, the maximum is 1000.
   ) {
@@ -265,38 +229,16 @@ export class GreaderClient {
   }
 
   public async getFeedItems( // TODO: Docu and define return type
-    feedUrl: string,
+    feedId: string,
     n: number = 20, // Number of loaded article entries
     xt: string | undefined = undefined // Excluded labels
   ) {
     let response = await this.httpService.request<any>({
-      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/atom/feed/${feedUrl}`),
+      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/stream/contents/feed/${feedId}`),
       method: HttpMethod.GET,
       urlSearchParams: {
         n: n,
         xt: xt,
-        T: this.sessionToken,
-        client: this.client,
-        output: "json"
-      },
-      headers: {
-        Authorization: `GoogleLogin auth=${this.userAuth}`,
-        Cookie: `SID=${this.sid}`
-      }
-    });
-    if (this.debug) console.log(response);
-    return response;
-  }
-
-  // Maybe this route doesnt exist
-  public async getUserSharedItems( // TODO: Docu and define return type
-    count: number = 20 // To get the number of articles shared by users
-  ) {
-    let response = await this.httpService.request<any>({
-      url: this.httpService.urlForge(this.apiEndpoint, `/reader/api/0/reader/atom/user/-/state/com.google/broadcast`),
-      method: HttpMethod.GET,
-      urlSearchParams: {
-        n: count,
         T: this.sessionToken,
         client: this.client,
         output: "json"
